@@ -27,6 +27,7 @@ model User {
 model Material {
   id          Int           @id @default(autoincrement())
   description String
+  group       String?
   active      Boolean       @default(true)
   KitMaterial KitMaterial[]
 }

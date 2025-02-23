@@ -67,7 +67,7 @@ export const listKits = async (req, res) => {
 				id: true,
 				material_id: true,
 				kit_id: true,
-				quantity: true,
+				// quantity: true,
 			},
 			where: { kit_id: kit.id },
 		});
