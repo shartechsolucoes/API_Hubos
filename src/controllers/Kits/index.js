@@ -22,7 +22,7 @@ export const createKit = async (req, res) => {
 		});
 	});
 
-	return res.send({ msg: 'Successfully created ' });
+	return res.send(newKit);
 };
 
 export const updateKit = async (req, res) => {
@@ -49,8 +49,12 @@ export const deleteKit = async (req, res) => {
 };
 export const getKit = async (req, res) => {
 	const { id } = req.params;
+	const kitId = parseInt(id);
 	const kit = await prisma.kit.findFirst({
-		where: { id },
+		where: { id: kitId },
+		include: {
+			materials: true,
+		},
 	});
 	return res.send(kit);
 };

@@ -11,7 +11,7 @@ export default function (fastify, opts, done) {
 	fastify.get('/kits', { onRequest: [verifyJwt] }, (request, reply) => {
 		return listKits(request, reply);
 	});
-	fastify.get('/kit', { onRequest: [verifyJwt] }, (request, reply) => {
+	fastify.get('/kit/:id', { onRequest: [verifyJwt] }, (request, reply) => {
 		return getKit(request, reply);
 	});
 	fastify.post('/kit', { onRequest: [verifyJwt] }, (request, reply) => {
