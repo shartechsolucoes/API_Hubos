@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String @id @default(uuid())
+  name         String
+  login        String @unique
+  password     String
+  access_level Int
+  expiration   Int
+  picture      String
+  email        String
+}
+
+model Material {
+  id          Int           @id @default(autoincrement())
+  description String
+  active      Boolean       @default(true)
+  KitMaterial KitMaterial[]
+}
+
+model KitMaterial {
+  id          Int      @id @default(autoincrement())
+  material    Material @relation(fields: [material_id], references: [id])
+  material_id Int
+  kit         Kit      @relation(fields: [kit_id], references: [id])
+  kit_id      Int
+  quantity    String
+}
+
+model Kit {
+  id          Int           @id @default(autoincrement())
+  description String
+  active      Boolean       @default(true)
+  materials   KitMaterial[]
+  OrdersKits  OrdersKits[]
+}
+
+model Tag {
+  id            Int    @id @default(autoincrement())
+  referenceCode String
+}
+
+model OrdersKits {
+  id       Int     @id @default(autoincrement())
+  order_id Int?
+  kit_id   Int
+  quantity String?
+  order    Order?  @relation(fields: [order_id], references: [id])
+  kit      Kit     @relation(fields: [kit_id], references: [id])
+}
+
+model Order {
+  id             Int          @id @default(autoincrement())
+  address        String       @db.VarChar(50)
+  userId         String       @default("")
+  neighborhood   String
+  city           String
+  state          String
+  observations   String?      @default("")
+  lat            String
+  long           String
+  qr_code        Int          @unique
+  protocolNumber String       @default("")
+  active         Boolean      @default(true)
+  registerDay    DateTime     @default(now())
+  duplicated     Boolean      @default(false)
+  ordersKits     OrdersKits[]
+}

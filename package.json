@@ -1,0 +1,37 @@
+{
+	"name": "apitemplate",
+	"version": "1.0.0",
+	"description": "",
+	"homepage": "https://github.com/aleoof/APITemplate#readme",
+	"bugs": {
+		"url": "https://github.com/aleoof/APITemplate/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/aleoof/APITemplate.git"
+	},
+	"license": "ISC",
+	"author": "Alexandre Oliveira",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"dev": "node --env-file=.env index",
+		"start": "npm run migrate && node --env-file=.env index.js",
+		"migrate": "npx prisma migrate dev --name init",
+		"dbpush": "npx prisma db push",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+		"@fastify/cors": "^10.0.2",
+		"@fastify/express": "^4.0.2",
+		"@fastify/jwt": "^9.0.3",
+		"@prisma/client": "^6.3.0",
+		"@types/bcryptjs": "^2.4.6",
+		"bcryptjs": "^2.4.3",
+		"fastify": "^5.2.1",
+		"fastify-cli": "^7.3.0"
+	},
+	"devDependencies": {
+		"prisma": "^6.3.0"
+	}
+}
