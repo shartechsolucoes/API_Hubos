@@ -28,16 +28,40 @@ export const createKit = async (req, res) => {
 export const updateKit = async (req, res) => {
 	const { id } = req.params;
 	const { description, materials } = req.body;
+	const kitId = parseInt(id);
 
-	const newKit = await prisma.kit.update({
-		where: { id },
+	await prisma.kit.update({
+		where: { id: kitId },
 		data: {
 			description,
-			materials,
 		},
 	});
 
-	return res.send(newKit);
+	materials.forEach(async (material) => {
+		const findMaterial = await prisma.kitMaterial.findFirst({
+			where: { kit_id: kitId, material_id: material.id },
+		});
+
+		console.log('material => ', findMaterial);
+		if (!findMaterial) {
+			await prisma.kitMaterial.create({
+				data: {
+					quantity: material.quantity,
+					kit_id: kitId,
+					material_id: material.id,
+				},
+			});
+		} else {
+			await prisma.kitMaterial.update({
+				where: { id: findMaterial.id },
+				data: {
+					quantity: material.quantity,
+				},
+			});
+		}
+	});
+
+	return res.send({ msg: 'updated kit' });
 };
 
 export const deleteKit = async (req, res) => {
