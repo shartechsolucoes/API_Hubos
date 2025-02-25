@@ -14,14 +14,15 @@ datasource db {
 }
 
 model User {
-  id           String @id @default(uuid())
+  id           String      @id @default(uuid())
   name         String
-  login        String @unique
+  login        String      @unique
   password     String
   access_level Int
   expiration   Int
   picture      String
   email        String
+  OrdersLog    OrdersLog[]
 }
 
 model Material {
@@ -70,6 +71,7 @@ model Order {
   neighborhood   String
   city           String
   state          String
+  status         Int          @default(0)
   observations   String?      @default("")
   lat            String
   long           String
@@ -79,4 +81,15 @@ model Order {
   registerDay    DateTime     @default(now())
   duplicated     Boolean      @default(false)
   ordersKits     OrdersKits[]
+  OrdersLog      OrdersLog[]
+}
+
+model OrdersLog {
+  id          Int      @id @default(autoincrement())
+  order_id    Int
+  userId      String
+  registerDay DateTime @default(now())
+  status      Int      @default(0)
+  order       Order?   @relation(fields: [order_id], references: [id])
+  user        User?    @relation(fields: [userId], references: [id])
 }

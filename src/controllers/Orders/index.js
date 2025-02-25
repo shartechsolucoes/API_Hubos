@@ -8,6 +8,7 @@ export const createOrder = async (req, res) => {
 		neighborhood,
 		city,
 		state,
+		status,
 		observations,
 		lat,
 		long,
@@ -21,6 +22,7 @@ export const createOrder = async (req, res) => {
 		timeZone: 'America/Sao_Paulo',
 	});
 	const osCode = parseInt(qr_code);
+	const osStatus = parseInt(status);
 
 	const tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
 	const localISOTime = new Date(Date.now() - tzoffset).toISOString();
@@ -31,6 +33,7 @@ export const createOrder = async (req, res) => {
 			neighborhood,
 			city,
 			state,
+			status: osStatus,
 			observations,
 			lat,
 			long,
@@ -61,6 +64,7 @@ export const updateOrder = async (req, res) => {
 		neighborhood,
 		city,
 		state,
+		status,
 		ordersKits,
 		observations,
 		lat,
@@ -70,6 +74,7 @@ export const updateOrder = async (req, res) => {
 	} = req.body;
 
 	const osCode = parseInt(qr_code);
+	const osStatus = parseInt(status);
 
 	const newOrder = await prisma.order.update({
 		where: { id: orderId },
@@ -78,6 +83,7 @@ export const updateOrder = async (req, res) => {
 			neighborhood,
 			city,
 			state,
+			status: osStatus,
 			observations,
 			lat,
 			long,
@@ -108,6 +114,7 @@ export const updateOrder = async (req, res) => {
 			});
 		}
 	});
+	
 	return res.send(newOrder);
 };
 export const deleteOrder = async (req, res) => {

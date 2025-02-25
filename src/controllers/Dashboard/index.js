@@ -4,9 +4,9 @@ const prisma = new PrismaClient();
 
 export const getDashboardData = async (req, res) => {
 	const [order, user, kit] = await prisma.$transaction([
-		prisma.order.count(),
+		prisma.order.count({where: { active: true }}),
 		prisma.user.count(),
-		prisma.kit.count(),
+		prisma.kit.count({where: { active: true }}),
 	]);
 
 	res.send({ order, user, kit });
