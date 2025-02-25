@@ -22,6 +22,7 @@ model User {
   expiration   Int
   picture      String
   email        String
+  phone        String?     @db.VarChar(15)
   OrdersLog    OrdersLog[]
 }
 

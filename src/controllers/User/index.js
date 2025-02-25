@@ -5,8 +5,16 @@ const { hashSync, genSaltSync, compareSync } = bcryptjs;
 const prisma = new PrismaClient();
 
 export const createUser = async (req, res) => {
-	const { login, password, email, name, access_level, expiration, picture } =
-		req.body;
+	const {
+		login,
+		password,
+		email,
+		name,
+		access_level,
+		expiration,
+		picture,
+		phone,
+	} = req.body;
 
 	const level = parseInt(access_level);
 
@@ -32,6 +40,7 @@ export const createUser = async (req, res) => {
 			expiration: 0,
 			picture: '',
 			email,
+			phone,
 		},
 	});
 
@@ -62,7 +71,11 @@ export const login = async (req, res) => {
 			{ login: user.login },
 			{ sign: { sub: user.id } }
 		);
-		return res.send({ token, access_level: user.access_level, userId: user.id });
+		return res.send({
+			token,
+			access_level: user.access_level,
+			userId: user.id,
+		});
 	} catch (err) {
 		return res.status(400).send({ msg: 'Internal error', err });
 	}
