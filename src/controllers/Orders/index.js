@@ -114,7 +114,7 @@ export const updateOrder = async (req, res) => {
 			});
 		}
 	});
-	
+
 	return res.send(newOrder);
 };
 export const deleteOrder = async (req, res) => {
@@ -212,7 +212,7 @@ export const findOrdersByDate = async (req, res) => {
 export const duplicateOrder = async (req, res) => {
 	const { id } = req.params;
 	const orderId = parseInt(id);
-	const orders = await prisma.order.findFirst({
+	const order = await prisma.order.findFirst({
 		omit: { id: true },
 		orderBy: { qr_code: 'desc' },
 	});
@@ -222,11 +222,16 @@ export const duplicateOrder = async (req, res) => {
 		omit: { id: true, order_id: true },
 	});
 
-	const osCode = parseInt(orders.qr_code);
+	const copyOrder = await prisma.order.findFirst({
+		where: { id: orderId },
+		omit: { id: true },
+	});
+
+	const osCode = parseInt(order.qr_code);
 
 	const duplicateOrder = await prisma.order.create({
 		data: {
-			...orders,
+			...copyOrder,
 			qr_code: osCode + 1,
 			registerDay: new Date(),
 			active: true,
