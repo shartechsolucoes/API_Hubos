@@ -3,6 +3,7 @@ import {
 	deleteKit,
 	getKit,
 	listKits,
+	removeMaterialKit,
 	updateKit,
 } from '../controllers/Kits/index.js';
 import { verifyJwt } from '../middleware/JWTAuth.js';
@@ -23,5 +24,14 @@ export default function (fastify, opts, done) {
 	fastify.put('/kit/:id', { onRequest: [verifyJwt] }, (request, reply) => {
 		return updateKit(request, reply);
 	});
+
+	fastify.delete(
+		'/kit-material/:materialid/:kitid',
+		{ onRequest: [verifyJwt] },
+		(request, reply) => {
+			return removeMaterialKit(request, reply);
+		}
+	);
+
 	done();
 }

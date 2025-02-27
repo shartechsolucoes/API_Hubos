@@ -106,3 +106,21 @@ export const listKits = async (req, res) => {
 
 	return res.send(all);
 };
+
+export const removeMaterialKit = async (req, res) => {
+	const { kitid, materialid } = req.params;
+	const kitId = parseInt(kitid);
+	const materialId = parseInt(materialid);
+
+	const findMaterial = await prisma.kitMaterial.findFirst({
+		where: { kit_id: kitId, material_id: materialId },
+	});
+
+	console.log(findMaterial.id);
+
+	await prisma.kitMaterial.delete({
+		where: { id: findMaterial.id },
+	});
+
+	return res.send({ msg: 'removed' });
+};
