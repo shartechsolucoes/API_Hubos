@@ -66,8 +66,10 @@ export const updateKit = async (req, res) => {
 
 export const deleteKit = async (req, res) => {
 	const { id } = req.params;
-	await prisma.kit.delete({
-		where: { id },
+	const kitId = parseInt(id);
+	await prisma.kit.update({
+		where: { id: kitId },
+		data: { active: false },
 	});
 	return res.send({ msg: 'Successfully deleted ' });
 };
@@ -84,7 +86,7 @@ export const getKit = async (req, res) => {
 };
 
 export const listKits = async (req, res) => {
-	const kits = await prisma.kit.findMany();
+	const kits = await prisma.kit.findMany({ where: { active: true } });
 
 	const listKits = kits.map(async (kit) => {
 		const materials = await prisma.kitMaterial.findMany({
