@@ -3,6 +3,7 @@ import {
 	deleteOrder,
 	duplicateOrder,
 	findOrdersByDate,
+	findOrdersMaterialsByDate,
 	getOrder,
 	listOrders,
 	removeKitOrder,
@@ -40,6 +41,14 @@ export default function (fastify, opts, done) {
 		{ onRequest: [verifyJwt] },
 		(request, reply) => {
 			return findOrdersByDate(request, reply);
+		}
+	);
+
+	fastify.get(
+		'/orders/report-materials',
+		{ onRequest: [verifyJwt] },
+		(request, reply) => {
+			return findOrdersMaterialsByDate(request, reply);
 		}
 	);
 
