@@ -207,77 +207,20 @@ export const findOrdersByDate = async (req, res) => {
 export const findOrdersMaterialsByDate = async (req, res) => {
 	const { start, end } = req.query;
 
-	const filteredByDate = await prisma.order.findMany({
-		where: {
-			active: true,
-			registerDay: {
-				lte: new Date(`${end}T23:59:59.999Z`),
-				gte: new Date(`${start}T00:00:00.000Z`),
-			},
-		},
-	});
+	const materialsData = await prisma.$queryRaw`
+				select o.qr_code as OS, ok.kit_id as IDKit, ok.quantity as qtdKits, m.id as idMaterial, m.description, km.quantity as qtdMaterialporkits from \`Order\` o
+        inner join
+        OrdersKits ok on o.id = ok.order_id
+        inner join KitMaterial km on km.kit_id = ok.kit_id
+        inner join Material m on m.id = km.material_id
+        where o.active=1 AND o.registerDay  >= ${
+					start + ' 00:00:00.000'
+				} AND o.registerDay <= ${end + ' 23:59:59.999'};
+`;
 
-	const orderList = await filteredByDate.map(async (order) => {
-		const orderId = order.id;
+	console.log(materialsData);
 
-		const ordersKits = await prisma.ordersKits.findMany({
-			where: { order_id: orderId },
-			include: {
-				kit: true,
-			},
-			omit: {
-				id: true,
-				order_id: true,
-				kit_id: true,
-			},
-		});
-
-		const materialOrders = ordersKits.map(async (kit, index) => {
-			const kitId = kit.kit.id;
-			const materials = await prisma.kitMaterial.findMany({
-				where: { kit_id: kitId },
-				include: { material: true },
-			});
-			return materials[index];
-		});
-
-		const allMaterials = await Promise.all(materialOrders);
-
-		return allMaterials;
-	});
-
-	const allMaterials = await Promise.all(orderList);
-	const materialsInfos = allMaterials
-		.flat()
-		.map((material) => ({
-			id: material.material.id,
-			description: material.material.description,
-			quantity: parseInt(material.quantity),
-		}))
-		.sort(function (a, b) {
-			return a.id - b.id;
-		});
-
-	const sumArray = materialsInfos.map((material) => {
-		const currentID = material.id;
-		const reduceReturn = materialsInfos.reduce((accumulator, current) => {
-			if (current.id === currentID) {
-				accumulator += current.quantity;
-			}
-			return accumulator;
-		}, 0);
-		return { ...material, quantity: reduceReturn };
-	});
-
-	const filtered = sumArray.reduce((unique, item) => {
-		if (!unique.some((obj) => obj.id === item.id)) {
-			unique.push(item);
-		}
-
-		return unique;
-	}, []);
-
-	res.send(filtered);
+	res.send('ok');
 };
 
 export const duplicateOrder = async (req, res) => {
