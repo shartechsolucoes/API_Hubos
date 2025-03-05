@@ -218,9 +218,37 @@ export const findOrdersMaterialsByDate = async (req, res) => {
 				} AND o.registerDay <= ${end + ' 23:59:59.999'};
 `;
 
-	console.log(materialsData);
+	const multiplyItens = materialsData.reduce((iterable, item) => {
+		const qtdMaterial = parseInt(item.qtdMaterialporkits);
+		const qtdKit = parseInt(item.qtdKits);
 
-	res.send('ok');
+		const mountObject = {
+			id: item.idMaterial,
+			description: item.description,
+			quantity: qtdMaterial * qtdKit,
+		};
+		iterable.push(mountObject);
+		return iterable;
+	}, []);
+
+	const reduceMaterialList = multiplyItens.reduce((iterable, item) => {
+		if (!iterable.some((i) => i.id === item.id)) {
+			iterable.push(item);
+		}
+
+		return iterable;
+	}, []);
+	const sumMaterials = reduceMaterialList.map((material) => {
+		let sum = 0;
+		multiplyItens.forEach((itemM) => {
+			if (material.id === itemM.id) {
+				sum += itemM.quantity;
+			}
+		});
+		return { ...material, quantity: sum };
+	});
+
+	res.send(sumMaterials);
 };
 
 export const duplicateOrder = async (req, res) => {
