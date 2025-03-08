@@ -126,3 +126,39 @@ export const updateUser = async (req, res) => {
 
 	return res.status(201).send(user);
 };
+
+export const changePassword = async (req, res) => {
+	const { oldPassword, newPassword, userId } = req.body;
+
+	const user = await prisma.user.findFirst({
+		where: {
+			id: userId,
+		},
+	});
+
+	if (!user) {
+		return res.status(500).send({ msg: 'User not found.' });
+	}
+
+	const samePassword = compareSync(oldPassword, user.password);
+
+	if (!samePassword) {
+		return res
+			.status(500)
+			.send({ msg: 'Error when try to change de password.' });
+	}
+
+	const salt = genSaltSync();
+	const hash = hashSync(newPassword, salt);
+
+	const newUser = await prisma.user.update({
+		where: { id: userId },
+		data: {
+			password: hash,
+		},
+	});
+
+	return res
+		.status(201)
+		.send({ msg: `User ${newUser.login} updated password` });
+};
