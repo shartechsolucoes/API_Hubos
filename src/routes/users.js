@@ -28,7 +28,7 @@ export default function (fastify, opts, done) {
 		return login(request, reply);
 	});
 
-	fastify.post('/reset-password', (request, reply) => {
+	fastify.put('/reset-password', (request, reply) => {
 		return changePassword(request, reply);
 	});
 	done();
