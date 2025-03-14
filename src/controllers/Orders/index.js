@@ -140,8 +140,12 @@ export const getOrder = async (req, res) => {
 	return res.send({ ...orders, ordersKits });
 };
 export const listOrders = async (req, res) => {
+	const { page } = req.query;
+
 	const orders = await prisma.order.findMany({
 		where: { active: true },
+		take: 10,
+		skip: parseInt(page || 0) * 10,
 		orderBy: [
 			{
 				id: 'desc',
