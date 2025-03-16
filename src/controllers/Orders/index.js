@@ -140,30 +140,43 @@ export const getOrder = async (req, res) => {
 	return res.send({ ...orders, ordersKits });
 };
 export const listOrders = async (req, res) => {
-	const { page, os, neighborhood, status } = req.query;
+	const { page, os, neighborhood, status, dateStart, dateEnd } = req.query;
 
 	let querySearch = '';
 
-	// qr_code LIKE CONCAT('%', ${os}, '%')
-	console.log('status =>', status);
-
-	// if (status && status !== '') {
-	// 	querySearch += `${querySearch} AND status = ` + status;
-	// }
 	if (os) {
 		querySearch += ` AND qr_code LIKE CONCAT('%', ${os}, '%')`;
 	}
 
-	console.log(`
-	SELECT qr_code FROM \`Order\`
-	WHERE qr_code LIKE CONCAT('%', ${os}, '%')
-		${querySearch}
-	`);
+	if (status && status !== '') {
+		querySearch += `${querySearch} AND status = ` + status;
+	}
 
-	const query = `SELECT qr_code FROM \`Order\` WHERE 1=1 AND
+	if (neighborhood) {
+		querySearch += ` AND neighborhood LIKE '%${neighborhood}%'`;
+	}
 
-	qr_code LIKE CONCAT('%', ${os}, '%')`;
-	const listOs = await prisma.$queryRaw`${query}`;
+	if (dateStart) {
+		querySearch += ` AND registerDay >= ${dateStart + ' 00:00:00.000'}`;
+	}
+
+	if (dateEnd) {
+		querySearch += ` AND registerDay <= ${dateEnd + ' 23:59:59.999'}`;
+	}
+
+	console.log(
+		`SELECT
+			 qr_code
+    FROM \`Order\`
+    where 1=1 ${querySearch};`);
+
+	const listOs = await prisma.$queryRawUnsafe(
+		`SELECT
+			 qr_code
+    FROM \`Order\`
+    where 1=1 ${querySearch};`);
+
+
 
 	console.log(listOs);
 
