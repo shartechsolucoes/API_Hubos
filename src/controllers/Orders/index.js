@@ -151,10 +151,24 @@ export const listOrders = async (req, res) => {
 				id: 'desc',
 			},
 		],
+		include: {
+			ordersKits: { include: { kit: true } },
+		},
 	});
+
+	const listOrders = orders.map(async (order) => {
+		if (!order.userId) {
+			return { ...order, user: {} };
+		}
+		const user = await prisma.user.findFirst({ where: order.userId });
+		return { ...order, user };
+	});
+
+	const resolvePromise = await Promise.all(listOrders);
+
 	const total = await prisma.order.count();
 	const actives = await prisma.order.count({ where: { active: true } });
-	return res.send({ orders, count: { total, actives } });
+	return res.send({ orders: resolvePromise, count: { total, actives } });
 };
 
 export const removeKitOrder = async (req, res) => {
