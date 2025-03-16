@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -141,6 +141,7 @@ export const getOrder = async (req, res) => {
 };
 export const listOrders = async (req, res) => {
 	const { page, os, neighborhood, status, dateStart, dateEnd } = req.query;
+	console.log('date =>', dateStart, dateEnd);
 
 	let querySearch = '';
 
@@ -156,51 +157,47 @@ export const listOrders = async (req, res) => {
 		querySearch += ` AND neighborhood LIKE '%${neighborhood}%'`;
 	}
 
-	if (dateStart) {
-		querySearch += ` AND registerDay >= ${dateStart + ' 00:00:00.000'}`;
+	if (dateStart && dateStart !== '') {
+		querySearch += ` AND registerDay >= \'${dateStart + ' 00:00:00.000'}\'`;
 	}
 
-	if (dateEnd) {
-		querySearch += ` AND registerDay <= ${dateEnd + ' 23:59:59.999'}`;
+	if (dateEnd && dateEnd !== '') {
+		querySearch += ` AND registerDay <= \'${dateEnd + ' 23:59:59.999'}\'`;
 	}
-
-	console.log(
-		`SELECT
-			 qr_code
-    FROM \`Order\`
-    where 1=1 ${querySearch};`);
 
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
 			 qr_code
     FROM \`Order\`
-    where 1=1 ${querySearch};`);
-
-
-
-	console.log(listOs);
+    where 1=1 ${querySearch};`
+	);
 
 	const osParser = listOs.map((lo) => parseInt(lo.qr_code));
 
-	const orders = await prisma.order.findMany({
+	const query = {
 		where: {
 			active: true,
-			neighborhood: {
-				contains: neighborhood,
-			},
 			qr_code: { in: osParser },
 		},
-		take: 10,
-		skip: parseInt(page || 0) * 10,
-		orderBy: [
-			{
-				id: 'desc',
+	};
+
+	const [orders, total, actives] = await prisma.$transaction([
+		prisma.order.findMany({
+			where: query.where,
+			take: 10,
+			skip: parseInt(page || 0) * 10,
+			orderBy: [
+				{
+					id: 'desc',
+				},
+			],
+			include: {
+				ordersKits: { include: { kit: true } },
 			},
-		],
-		include: {
-			ordersKits: { include: { kit: true } },
-		},
-	});
+		}),
+		prisma.order.count({ where: query.where }),
+		prisma.order.count({ where: query.where }),
+	]);
 
 	const listOrders = orders.map(async (order) => {
 		if (!order.userId) {
@@ -212,8 +209,7 @@ export const listOrders = async (req, res) => {
 
 	const resolvePromise = await Promise.all(listOrders);
 
-	const total = await prisma.order.count();
-	const actives = await prisma.order.count({ where: { active: true } });
+	// const actives = await prisma.order.count({ where: { active: true } });
 	return res.send({ orders: resolvePromise, count: { total, actives } });
 };
 
