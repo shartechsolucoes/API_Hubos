@@ -140,10 +140,43 @@ export const getOrder = async (req, res) => {
 	return res.send({ ...orders, ordersKits });
 };
 export const listOrders = async (req, res) => {
-	const { page } = req.query;
+	const { page, os, neighborhood, status } = req.query;
+
+	let querySearch = '';
+
+	// qr_code LIKE CONCAT('%', ${os}, '%')
+	console.log('status =>', status);
+
+	// if (status && status !== '') {
+	// 	querySearch += `${querySearch} AND status = ` + status;
+	// }
+	if (os) {
+		querySearch += ` AND qr_code LIKE CONCAT('%', ${os}, '%')`;
+	}
+
+	console.log(`
+	SELECT qr_code FROM \`Order\`
+	WHERE qr_code LIKE CONCAT('%', ${os}, '%')
+		${querySearch}
+	`);
+
+	const query = `SELECT qr_code FROM \`Order\` WHERE 1=1 AND
+
+	qr_code LIKE CONCAT('%', ${os}, '%')`;
+	const listOs = await prisma.$queryRaw`${query}`;
+
+	console.log(listOs);
+
+	const osParser = listOs.map((lo) => parseInt(lo.qr_code));
 
 	const orders = await prisma.order.findMany({
-		where: { active: true },
+		where: {
+			active: true,
+			neighborhood: {
+				contains: neighborhood,
+			},
+			qr_code: { in: osParser },
+		},
 		take: 10,
 		skip: parseInt(page || 0) * 10,
 		orderBy: [
