@@ -141,7 +141,6 @@ export const getOrder = async (req, res) => {
 };
 export const listOrders = async (req, res) => {
 	const { page, os, neighborhood, status, dateStart, dateEnd } = req.query;
-	console.log('date =>', dateStart, dateEnd);
 
 	let querySearch = '';
 
@@ -200,7 +199,6 @@ export const listOrders = async (req, res) => {
 	]);
 
 	const listOrders = orders.map(async (order) => {
-		console.log('user ID => ', order.userId);
 		if (!order.userId) {
 			return { ...order, user: {} };
 		}
