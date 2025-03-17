@@ -146,29 +146,29 @@ export const listOrders = async (req, res) => {
 	let querySearch = '';
 
 	if (os) {
-		querySearch += ` AND qr_code LIKE CONCAT('%', ${os}, '%')`;
+		querySearch += ` AND o.qr_code LIKE CONCAT('%', ${os}, '%')`;
 	}
 
 	if (status && status !== '') {
-		querySearch += `${querySearch} AND status = ` + status;
+		querySearch += `${querySearch} AND o.status = ` + status;
 	}
 
 	if (neighborhood) {
-		querySearch += ` AND neighborhood LIKE '%${neighborhood}%'`;
+		querySearch += ` AND o.neighborhood LIKE '%${neighborhood}%'`;
 	}
 
 	if (dateStart && dateStart !== '') {
-		querySearch += ` AND registerDay >= \'${dateStart + ' 00:00:00.000'}\'`;
+		querySearch += ` AND o.registerDay >= \'${dateStart + ' 00:00:00.000'}\'`;
 	}
 
 	if (dateEnd && dateEnd !== '') {
-		querySearch += ` AND registerDay <= \'${dateEnd + ' 23:59:59.999'}\'`;
+		querySearch += ` AND o.registerDay <= \'${dateEnd + ' 23:59:59.999'}\'`;
 	}
 
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
-			 qr_code
-    FROM \`Order\`
+			 o.qr_code
+    FROM \`Order\` o
     where 1=1 ${querySearch};`
 	);
 
@@ -200,10 +200,13 @@ export const listOrders = async (req, res) => {
 	]);
 
 	const listOrders = orders.map(async (order) => {
+		console.log('user ID => ', order.userId);
 		if (!order.userId) {
 			return { ...order, user: {} };
 		}
-		const user = await prisma.user.findFirst({ where: order.userId });
+		const user = await prisma.user.findFirst({
+			where: { id: order.userId },
+		});
 		return { ...order, user };
 	});
 
