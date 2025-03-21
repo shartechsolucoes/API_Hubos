@@ -16,6 +16,10 @@ datasource db {
 model User {
   id           String      @id @default(uuid())
   name         String
+  address      String?     @db.VarChar(150)
+  neighborhood String?     @db.VarChar(50)
+  city         String?     @db.VarChar(50)
+  state        String?     @db.VarChar(3)
   login        String      @unique
   password     String
   access_level Int
@@ -30,6 +34,7 @@ model Material {
   id          Int           @id @default(autoincrement())
   description String
   group       String?
+  unit        String?
   active      Boolean       @default(true)
   KitMaterial KitMaterial[]
 }
@@ -67,16 +72,16 @@ model OrdersKits {
 
 model Order {
   id             Int          @id @default(autoincrement())
-  address        String       @db.VarChar(50)
+  address        String       @db.VarChar(150)
   userId         String       @default("")
-  neighborhood   String
-  city           String
-  state          String
+  neighborhood   String       @db.VarChar(50)
+  city           String       @db.VarChar(50)
+  state          String       @db.VarChar(3)
   status         Int          @default(0)
   observations   String?      @default("")
   lat            String
   long           String
-  qr_code        Int          @unique
+  qr_code        Int
   protocolNumber String       @default("")
   active         Boolean      @default(true)
   registerDay    DateTime     @default(now())
