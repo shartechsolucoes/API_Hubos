@@ -143,6 +143,7 @@ export const listOrders = async (req, res) => {
 	const { page, os, neighborhood, status, dateStart, dateEnd } = req.query;
 
 	let querySearch = '';
+	let queryPagination = '';
 
 	if (os) {
 		querySearch += ` AND o.qr_code LIKE CONCAT('%', ${os}, '%')`;
@@ -164,18 +165,21 @@ export const listOrders = async (req, res) => {
 		querySearch += ` AND o.registerDay <= \'${dateEnd + ' 23:59:59.999'}\'`;
 	}
 
+	if (page && page !== '') {
+		queryPagination += `LIMIT 10 OFFSET ${parseInt(page || 0) * 10}`;
+	}
+
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
 			 o.qr_code
     FROM \`Order\` o
-    where 1=1 ${querySearch};`
+    where o.active = 1 ${querySearch} order by o.id desc ${queryPagination};`
 	);
 
 	const osParser = listOs.map((lo) => parseInt(lo.qr_code));
 
 	const query = {
 		where: {
-			active: true,
 			qr_code: { in: osParser },
 		},
 	};
@@ -183,19 +187,13 @@ export const listOrders = async (req, res) => {
 	const [orders, total, actives] = await prisma.$transaction([
 		prisma.order.findMany({
 			where: query.where,
-			take: 10,
-			skip: parseInt(page || 0) * 10,
-			orderBy: [
-				{
-					id: 'desc',
-				},
-			],
+			orderBy: { id: 'desc' },
 			include: {
 				ordersKits: { include: { kit: true } },
 			},
 		}),
 		prisma.order.count({ where: query.where }),
-		prisma.order.count({ where: query.where }),
+		prisma.order.count({ where: { active: true } }),
 	]);
 
 	const listOrders = orders.map(async (order) => {
@@ -210,7 +208,6 @@ export const listOrders = async (req, res) => {
 
 	const resolvePromise = await Promise.all(listOrders);
 
-	// const actives = await prisma.order.count({ where: { active: true } });
 	return res.send({ orders: resolvePromise, count: { total, actives } });
 };
 
