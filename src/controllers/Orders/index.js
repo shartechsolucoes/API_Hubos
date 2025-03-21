@@ -2,6 +2,11 @@ import { Prisma, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+BigInt.prototype.toJSON = function () {
+	const int = Number.parseInt(this.toString());
+	return int ?? this.toString();
+};
+
 export const createOrder = async (req, res) => {
 	const {
 		address,
@@ -177,6 +182,7 @@ export const listOrders = async (req, res) => {
 	);
 
 	const osParser = listOs.map((lo) => parseInt(lo.qr_code));
+	console.log(osParser);
 
 	const query = {
 		where: {
@@ -192,7 +198,11 @@ export const listOrders = async (req, res) => {
 				ordersKits: { include: { kit: true } },
 			},
 		}),
-		prisma.order.count({ where: query.where }),
+		prisma.$queryRawUnsafe(
+			`SELECT COUNT(*) as total
+			FROM \`Order\` o
+			where o.active = 1 ${querySearch} ;`
+		),
 		prisma.order.count({ where: { active: true } }),
 	]);
 
@@ -208,7 +218,10 @@ export const listOrders = async (req, res) => {
 
 	const resolvePromise = await Promise.all(listOrders);
 
-	return res.send({ orders: resolvePromise, count: { total, actives } });
+	return res.send({
+		orders: resolvePromise,
+		count: { total: total[0].total, actives },
+	});
 };
 
 export const removeKitOrder = async (req, res) => {
