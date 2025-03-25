@@ -14,6 +14,11 @@ export const createUser = async (req, res) => {
 		expiration,
 		picture,
 		phone,
+		address,
+		neighborhood,
+		state,
+		city,
+		status,
 	} = req.body;
 
 	const level = parseInt(access_level);
@@ -41,6 +46,11 @@ export const createUser = async (req, res) => {
 			picture: '',
 			email,
 			phone,
+			address,
+			neighborhood,
+			state,
+			city,
+			status: status === '0' ? true : false,
 		},
 	});
 
@@ -76,6 +86,7 @@ export const login = async (req, res) => {
 			access_level: user.access_level,
 			userId: user.id,
 			userName: user.name,
+			picture: user.picture,
 		});
 	} catch (err) {
 		return res.status(400).send({ msg: 'Internal error', err });
@@ -101,8 +112,21 @@ export const getUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-	const { login, password, email, name, access_level, expiration, picture } =
-		req.body;
+	const {
+		login,
+		password,
+		email,
+		name,
+		access_level,
+		expiration,
+		picture,
+		phone,
+		address,
+		neighborhood,
+		state,
+		city,
+		status,
+	} = req.body;
 
 	const { id } = req.params;
 
@@ -122,6 +146,12 @@ export const updateUser = async (req, res) => {
 			expiration: 0,
 			picture: '',
 			email,
+			phone,
+			address,
+			neighborhood,
+			state,
+			city,
+			status: status === '0' ? true : false,
 		},
 	});
 
