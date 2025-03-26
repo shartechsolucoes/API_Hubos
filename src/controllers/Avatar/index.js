@@ -10,6 +10,10 @@ const __dirname = dirname(__filename);
 
 const prisma = new PrismaClient();
 
+if (!fs.existsSync('./public/uploads')) {
+	fs.mkdirSync('./public/uploads', { recursive: true });
+}
+
 export const postAvatar = async (req, res) => {
 	const parts = req.parts();
 	const { id } = req.query;
@@ -19,9 +23,6 @@ export const postAvatar = async (req, res) => {
 			const uploadPath = path.join('public', 'uploads', part.filename);
 
 			// Cria o diretório 'uploads' se não existir
-			if (!fs.existsSync('public/uploads')) {
-				fs.mkdirSync('public/uploads');
-			}
 
 			// Cria um stream de escrita para salvar o arquivo
 			const writeStream = fs.createWriteStream(uploadPath);
