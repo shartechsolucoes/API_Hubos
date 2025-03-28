@@ -43,7 +43,7 @@ export const createUser = async (req, res) => {
 			name,
 			access_level: level,
 			expiration: 0,
-			picture: '',
+			picture: picture || '',
 			email,
 			phone,
 			address,
@@ -144,7 +144,7 @@ export const updateUser = async (req, res) => {
 			name,
 			access_level: level,
 			expiration: 0,
-			picture: '',
+			// picture: picture || '',
 			email,
 			phone,
 			address,
@@ -153,6 +153,7 @@ export const updateUser = async (req, res) => {
 			city,
 			status: status === '0' ? true : false,
 		},
+		omit: { password: true },
 	});
 
 	return res.status(201).send(user);

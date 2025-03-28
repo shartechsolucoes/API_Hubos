@@ -24,7 +24,7 @@ model User {
   password     String
   access_level Int
   expiration   Int
-  picture      String
+  picture      String?
   email        String
   phone        String?     @db.VarChar(15)
   status       Boolean?

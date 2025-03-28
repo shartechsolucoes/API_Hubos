@@ -34,10 +34,12 @@ export const postAvatar = async (req, res) => {
 				writeStream.on('error', reject);
 			});
 
-			await prisma.user.update({
-				where: { id },
-				data: { picture: `/images/${part.filename}` },
-			});
+			if (id) {
+				await prisma.user.update({
+					where: { id },
+					data: { picture: `/images/${part.filename}` },
+				});
+			}
 
 			res.send({
 				message: 'Arquivo enviado com sucesso!',
