@@ -65,8 +65,16 @@ export const getMaterial = async (req, res) => {
 	return res.send(materials);
 };
 export const listMaterials = async (req, res) => {
+	const { name } = req.query;
+
+	let queryDB = { active: true };
+
+	if (name) {
+		queryDB = { ...queryDB, description: { contains: name } };
+	}
+
 	const materials = await prisma.material.findMany({
-		where: { active: true },
+		where: queryDB,
 	});
 	return res.send(materials);
 };
