@@ -86,7 +86,17 @@ export const getKit = async (req, res) => {
 };
 
 export const listKits = async (req, res) => {
-	const kits = await prisma.kit.findMany({ where: { active: true } });
+	const { name, material } = req.query;
+
+	let queryDB = { active: true };
+
+	console.log(name);
+
+	if (name) {
+		queryDB = { ...queryDB, description: { contains: name } };
+	}
+
+	const kits = await prisma.kit.findMany({ where: queryDB });
 
 	const listKits = kits.map(async (kit) => {
 		const materials = await prisma.kitMaterial.findMany({
@@ -99,12 +109,28 @@ export const listKits = async (req, res) => {
 				kit_id: true,
 				// quantity: true,
 			},
-			where: { kit_id: kit.id },
+			where: {
+				kit_id: kit.id,
+			},
 		});
 		return { ...kit, materials };
 	});
 
 	const all = await Promise.all(listKits);
+
+	console.log('material =>', material);
+
+	if (material) {
+		const filteredMaterial = all.filter((kit) => {
+			console.log(
+				kit.materials.some((mt) => mt.material.description.match(material))
+			);
+			return kit.materials.some((mt) =>
+				mt.material.description.match(material)
+			);
+		});
+		return res.send(filteredMaterial);
+	}
 
 	return res.send(all);
 };
