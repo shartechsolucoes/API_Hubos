@@ -44,10 +44,18 @@ export const getTags = async (req, res) => {
 		queryPagination += `LIMIT 10 OFFSET ${parseInt(page || 0) * 10}`;
 	}
 	const qr_code = await prisma.$queryRawUnsafe(
-		`SELECT t.*, o.qr_code FROM Tag t LEFT JOIN \`Order\` o ON o.qr_code = t.referenceCode ${queryPagination};`
+		`SELECT t.*, o.qr_code
+			FROM Tag t
+			LEFT JOIN \`Order\` o ON o.qr_code = t.referenceCode
+			ORDER BY (o.qr_code IS NULL) DESC, o.qr_code, t.referenceCode
+			${queryPagination};
+		`
 	);
 
-	return res.send(qr_code);
+	const totalItems = await prisma.$queryRaw`
+	SELECT COUNT(*) as total FROM Tag`;
+
+	return res.send({ total: totalItems[0].total, items: qr_code });
 };
 
 export const updateRegisteredTags = async (req, res) => {

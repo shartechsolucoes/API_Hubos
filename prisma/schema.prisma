@@ -59,7 +59,7 @@ model Kit {
 
 model Tag {
   id            Int    @id @default(autoincrement())
-  referenceCode String
+  referenceCode String @unique
 }
 
 model OrdersKits {
