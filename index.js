@@ -30,8 +30,19 @@ fastify.register(fastifyMultipart, {
 });
 
 fastify.register(fastifyStatic, {
-	root: path.join(__dirname, 'public', 'uploads'), // Diretório onde os arquivos são armazenados
-	prefix: '/images/', // Prefixo na URL para acessar os arquivos
+	root: path.join(__dirname, 'public', 'uploads'),
+	prefix: '/images/',
+	decorateReply: false,
+});
+fastify.register(fastifyStatic, {
+	root: path.join(__dirname, 'public', 'startWork'),
+	prefix: '/images/startWork',
+	decorateReply: false,
+});
+fastify.register(fastifyStatic, {
+	root: path.join(__dirname, 'public', 'endWork'),
+	prefix: '/images/endWork',
+	decorateReply: false,
 });
 
 await fastify.register(cors, {

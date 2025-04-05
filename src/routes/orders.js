@@ -9,6 +9,10 @@ import {
 	removeKitOrder,
 	updateOrder,
 } from '../controllers/Orders/index.js';
+import {
+	insertEndPhoto,
+	insertStartPhoto,
+} from '../controllers/Orders/Photos/index.js';
 import { verifyJwt } from '../middleware/JWTAuth.js';
 
 export default function (fastify, opts, done) {
@@ -59,5 +63,21 @@ export default function (fastify, opts, done) {
 			return duplicateOrder(request, reply);
 		}
 	);
+	fastify.post(
+		'/order/start-work-photo',
+		{ onRequest: [verifyJwt] },
+		(request, reply) => {
+			return insertStartPhoto(request, reply);
+		}
+	);
+
+	fastify.post(
+		'/order/end-work-photo',
+		{ onRequest: [verifyJwt] },
+		(request, reply) => {
+			return insertEndPhoto(request, reply);
+		}
+	);
+
 	done();
 }

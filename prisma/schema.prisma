@@ -87,6 +87,8 @@ model Order {
   active         Boolean      @default(true)
   registerDay    DateTime     @default(now())
   duplicated     Boolean      @default(false)
+  photoStartWork String?
+  photoEndWork   String?
   ordersKits     OrdersKits[]
   OrdersLog      OrdersLog[]
 }
