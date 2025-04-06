@@ -21,6 +21,8 @@ export const createOrder = async (req, res) => {
 		ordersKits,
 		protocolNumber,
 		userId,
+		photoEndWork,
+		photoStartWork,
 	} = req.body;
 
 	const date = new Date().toLocaleString('sv-SE', {
@@ -46,6 +48,8 @@ export const createOrder = async (req, res) => {
 			registerDay: localISOTime,
 			protocolNumber,
 			userId,
+			photoEndWork,
+			photoStartWork,
 		},
 	});
 
@@ -76,6 +80,8 @@ export const updateOrder = async (req, res) => {
 		long,
 		qr_code,
 		protocolNumber,
+		photoEndWork,
+		photoStartWork,
 	} = req.body;
 
 	const osCode = parseInt(qr_code);
@@ -94,6 +100,8 @@ export const updateOrder = async (req, res) => {
 			long,
 			qr_code: osCode,
 			protocolNumber,
+			photoEndWork,
+			photoStartWork,
 		},
 	});
 	ordersKits.forEach(async (kit) => {
