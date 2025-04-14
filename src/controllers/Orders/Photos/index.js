@@ -63,7 +63,7 @@ export const insertStartPhoto = async (req, res) => {
 							where: { id: parseInt(id) },
 							data: {
 								photoStartWork: `/images/startWork/${webpFilename}`,
-								status: 3,
+								status: 1,
 							},
 						});
 					} catch (error) {
@@ -130,6 +130,7 @@ export const insertEndPhoto = async (req, res) => {
 					writeStream.on('error', reject);
 				});
 				if (id) {
+					console.log('entra');
 					try {
 						await prisma.order.update({
 							where: { id: parseInt(id) },
@@ -145,7 +146,7 @@ export const insertEndPhoto = async (req, res) => {
 						});
 					}
 				}
-				res.send({
+				await res.send({
 					message: 'Arquivo enviado com sucesso!',
 					file: `/images/endWork/${webpFilename}`,
 				});
