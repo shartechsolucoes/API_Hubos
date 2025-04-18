@@ -59,7 +59,8 @@ model Kit {
 
 model Tag {
   id            Int    @id @default(autoincrement())
-  referenceCode String @unique
+  referenceCode Int @unique
+  date DateTime?
 }
 
 model OrdersKits {

@@ -15,11 +15,18 @@ export const createTags = async (req, res) => {
 
 	const newTags = [];
 
+	const date = new Date();
+
+	date.setHours(date.getHours() - 3);
+
 	for (let index = parseInt(start); index <= end; index++) {
-		const haveInList = qr_code.some((qr) => qr.referenceCode === `${index}`);
+		const haveInList = qr_code.some((qr) => qr.referenceCode === index);
 
 		if (!haveInList) {
-			newTags.push({ referenceCode: `${index}` });
+			newTags.push({
+				referenceCode: index,
+				date: date,
+			});
 		}
 	}
 
@@ -47,7 +54,7 @@ export const getTags = async (req, res) => {
 		`SELECT t.*, o.qr_code
 			FROM Tag t
 			LEFT JOIN \`Order\` o ON o.qr_code = t.referenceCode
-			ORDER BY (o.qr_code IS NULL) DESC, o.qr_code, t.referenceCode
+			ORDER BY t.referenceCode DESC
 			${queryPagination};
 		`
 	);
