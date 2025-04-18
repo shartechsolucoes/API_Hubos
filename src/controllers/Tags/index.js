@@ -6,10 +6,6 @@ export const createTags = async (req, res) => {
 	const { start, end } = req.query;
 
 	const qr_code = await prisma.$queryRaw`
-		SELECT o.qr_code AS referenceCode FROM \`Order\` o
-
-		UNION
-
 		SELECT t.referenceCode AS referenceCode FROM  Tag t
 	`;
 
