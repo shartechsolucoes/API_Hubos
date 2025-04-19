@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const createMaterial = async (req, res) => {
-	const { description, group, active } = req.body;
+	const { description, group, active, quantity } = req.body;
 
 	let activeMaterial;
 	if (typeof active === 'string') {
@@ -17,6 +17,7 @@ export const createMaterial = async (req, res) => {
 			description,
 			group,
 			active: activeMaterial,
+			quantity,
 		},
 	});
 

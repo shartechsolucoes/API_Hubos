@@ -37,6 +37,7 @@ model Material {
   group       String?
   unit        String?
   active      Boolean       @default(true)
+  quantity    String?
   KitMaterial KitMaterial[]
 }
 
