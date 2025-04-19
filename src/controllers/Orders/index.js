@@ -288,7 +288,7 @@ export const findOrdersMaterialsByDate = async (req, res) => {
 	const { start, end } = req.query;
 
 	const materialsData = await prisma.$queryRaw`
-				select o.qr_code as OS, ok.kit_id as IDKit, ok.quantity as qtdKits, m.id as idMaterial, m.description, km.quantity as qtdMaterialporkits, m.quantity as materialQtd from \`Order\` o
+				select o.qr_code as OS, ok.kit_id as IDKit, ok.quantity as qtdKits, m.id as idMaterial, m.description, km.quantity as qtdMaterialporkits, m.unit as unit from \`Order\` o
         inner join
         OrdersKits ok on o.id = ok.order_id
         inner join KitMaterial km on km.kit_id = ok.kit_id
@@ -306,7 +306,7 @@ export const findOrdersMaterialsByDate = async (req, res) => {
 			id: item.idMaterial,
 			description: item.description,
 			quantity: qtdMaterial * qtdKit,
-			quantityMaterial: item.materialQtd,
+			quantityMaterial: item.unit,
 		};
 		iterable.push(mountObject);
 		return iterable;
