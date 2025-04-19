@@ -194,3 +194,19 @@ export const changePassword = async (req, res) => {
 		.status(201)
 		.send({ msg: `User ${newUser.login} updated password` });
 };
+
+export const userActivities = async (req, res) => {
+	const { id } = req.params;
+
+	const activities = await prisma.order.findMany({
+		where: { userId: id },
+		take: 3,
+		orderBy: { id: 'desc' },
+	});
+
+	if (!activities) {
+		return res.status(400).send([]);
+	}
+
+	return res.status(200).send(activities);
+};
