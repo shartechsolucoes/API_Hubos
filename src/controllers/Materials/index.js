@@ -17,7 +17,6 @@ export const createMaterial = async (req, res) => {
 			description,
 			group,
 			active: activeMaterial,
-			quantity,
 			unit,
 		},
 	});
@@ -27,7 +26,7 @@ export const createMaterial = async (req, res) => {
 export const updateMaterial = async (req, res) => {
 	const { id } = req.params;
 	const materialId = parseInt(id);
-	const { description, quantity, kitId, group, active, unit } = req.body;
+	const { description, kitId, group, active, unit } = req.body;
 
 	let activeMaterial;
 	if (typeof active === 'string') {
@@ -40,7 +39,6 @@ export const updateMaterial = async (req, res) => {
 		where: { id: materialId },
 		data: {
 			description,
-			quantity,
 			kitId,
 			group,
 			active: activeMaterial,
