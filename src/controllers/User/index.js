@@ -76,6 +76,10 @@ export const login = async (req, res) => {
 		return res.status(400).send({ err: 'Incorrect Password' });
 	}
 
+	if (!user.status) {
+		return res.status(400).send({ err: 'User inactive' });
+	}
+
 	try {
 		const token = await res.jwtSign(
 			{ login: user.login },
