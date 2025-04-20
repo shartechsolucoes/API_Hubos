@@ -306,7 +306,7 @@ export const findOrdersMaterialsByDate = async (req, res) => {
 			id: item.idMaterial,
 			description: item.description,
 			quantity: qtdMaterial * qtdKit,
-			quantityMaterial: item.unit,
+			unit: item.unit,
 		};
 		iterable.push(mountObject);
 		return iterable;
