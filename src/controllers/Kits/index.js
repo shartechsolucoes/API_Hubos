@@ -3,12 +3,13 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const createKit = async (req, res) => {
-	const { description, materials } = req.body;
+	const { description, materials, status } = req.body;
 	console.log(req.body);
 
 	const newKit = await prisma.kit.create({
 		data: {
 			description,
+			status: status === 'true' ? true : false,
 		},
 	});
 
@@ -27,13 +28,14 @@ export const createKit = async (req, res) => {
 
 export const updateKit = async (req, res) => {
 	const { id } = req.params;
-	const { description, materials } = req.body;
+	const { description, materials, status } = req.body;
 	const kitId = parseInt(id);
 
 	await prisma.kit.update({
 		where: { id: kitId },
 		data: {
 			description,
+			status: status === 'true' ? true : false,
 		},
 	});
 

@@ -54,6 +54,7 @@ model Kit {
   id          Int           @id @default(autoincrement())
   description String
   active      Boolean       @default(true)
+  status      Boolean       @default(true)
   materials   KitMaterial[]
   OrdersKits  OrdersKits[]
 }
