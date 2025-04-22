@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const createMaterial = async (req, res) => {
-	const { description, group, active, unit } = req.body;
+	const { description, group, active, unit, status } = req.body;
 
 	let activeMaterial;
 	if (typeof active === 'string') {
@@ -18,6 +18,7 @@ export const createMaterial = async (req, res) => {
 			group,
 			active: activeMaterial,
 			unit,
+			status,
 		},
 	});
 
@@ -26,7 +27,7 @@ export const createMaterial = async (req, res) => {
 export const updateMaterial = async (req, res) => {
 	const { id } = req.params;
 	const materialId = parseInt(id);
-	const { description, kitId, group, active, unit } = req.body;
+	const { description, kitId, group, active, unit, status } = req.body;
 
 	let activeMaterial;
 	if (typeof active === 'string') {
@@ -43,6 +44,7 @@ export const updateMaterial = async (req, res) => {
 			group,
 			active: activeMaterial,
 			unit,
+			status,
 		},
 	});
 
