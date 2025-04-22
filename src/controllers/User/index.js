@@ -200,7 +200,7 @@ export const changePassword = async (req, res) => {
 };
 
 export const userActivities = async (req, res) => {
-	const { id } = req.params;
+	const { id } = req.query;
 
 	const activities = await prisma.order.findMany({
 		where: { userId: id },
