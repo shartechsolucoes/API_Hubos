@@ -208,9 +208,11 @@ export const userActivities = async (req, res) => {
 		orderBy: { id: 'desc' },
 	});
 
+	const count = await prisma.order.count({ where: { userId: id } });
+
 	if (!activities) {
 		return res.status(400).send([]);
 	}
 
-	return res.status(200).send(activities);
+	return res.status(200).send({ activities, count });
 };
