@@ -12,17 +12,17 @@ const __dirname = dirname(__filename);
 
 const prisma = new PrismaClient();
 
-if (!fs.existsSync('./public/startWork')) {
-	fs.mkdirSync('./public/startWork', { recursive: true });
-}
-
-if (!fs.existsSync('./public/endWork')) {
-	fs.mkdirSync('./public/endWork', { recursive: true });
+if (!fs.existsSync('./public/order')) {
+	fs.mkdirSync('./public/order', { recursive: true });
 }
 
 export const insertStartPhoto = async (req, res) => {
 	const parts = req.parts();
 	const { id } = req.query;
+
+	if (!fs.existsSync(`./public/order/${id}`)) {
+		fs.mkdirSync(`./public/order/${id}`, { recursive: true });
+	}
 
 	for await (const part of parts) {
 		if (part.file) {
@@ -33,12 +33,8 @@ export const insertStartPhoto = async (req, res) => {
 				});
 			}
 			// const uploadPath = path.join('public', 'endWork', part.filename);
-			const webpFilename =
-				path.basename(
-					part.filename.replaceAll(' ', ''),
-					path.extname(part.filename.replaceAll(' ', ''))
-				) + '.webp';
-			const webpPath = path.join('public', 'startWork', webpFilename);
+			const webpFilename = 'start' + '.webp';
+			const webpPath = path.join('public', 'order', id, webpFilename);
 
 			const writeStream = fs.createWriteStream(webpPath);
 
@@ -62,7 +58,7 @@ export const insertStartPhoto = async (req, res) => {
 						await prisma.order.update({
 							where: { id: parseInt(id) },
 							data: {
-								photoStartWork: `/images/startWork/${webpFilename}`,
+								photoStartWork: `/images/order/${id}/start.webp`,
 								status: 1,
 							},
 						});
@@ -75,10 +71,11 @@ export const insertStartPhoto = async (req, res) => {
 				}
 				res.send({
 					message: 'Arquivo enviado com sucesso!',
-					file: `/images/startWork/${webpFilename}`,
+					file: `/images/order/${id}/start.webp`,
 				});
 			} catch (error) {
 				console.error('Erro ao processar a imagem');
+				console.error(error);
 				return res.send({
 					error: 'Erro ao processar a imagem, por favor, tente novamente.',
 				});
@@ -95,6 +92,10 @@ export const insertEndPhoto = async (req, res) => {
 	const parts = req.parts();
 	const { id } = req.query;
 
+	if (!fs.existsSync(`./public/order/${id}`)) {
+		fs.mkdirSync(`./public/order/${id}`, { recursive: true });
+	}
+
 	for await (const part of parts) {
 		if (part.file) {
 			const fileType = mime.lookup(part.filename);
@@ -104,12 +105,8 @@ export const insertEndPhoto = async (req, res) => {
 				});
 			}
 			// const uploadPath = path.join('public', 'endWork', part.filename);
-			const webpFilename =
-				path.basename(
-					part.filename.replaceAll(' ', ''),
-					path.extname(part.filename.replaceAll(' ', ''))
-				) + '.webp';
-			const webpPath = path.join('public', 'endWork', webpFilename);
+			const webpFilename = 'end' + '.webp';
+			const webpPath = path.join('public', 'order', id, webpFilename);
 
 			const writeStream = fs.createWriteStream(webpPath);
 
@@ -135,7 +132,7 @@ export const insertEndPhoto = async (req, res) => {
 						await prisma.order.update({
 							where: { id: parseInt(id) },
 							data: {
-								photoEndWork: `/images/endWork/${webpFilename}`,
+								photoEndWork: `/images/order/${id}/end.webp`,
 								status: 2,
 							},
 						});
@@ -148,7 +145,7 @@ export const insertEndPhoto = async (req, res) => {
 				}
 				await res.send({
 					message: 'Arquivo enviado com sucesso!',
-					file: `/images/endWork/${webpFilename}`,
+					file: `/images/order/${id}/end.webp`,
 				});
 			} catch (error) {
 				console.error('Erro ao processar a imagem');

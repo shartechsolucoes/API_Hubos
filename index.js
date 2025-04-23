@@ -45,6 +45,12 @@ fastify.register(fastifyStatic, {
 	decorateReply: false,
 });
 
+fastify.register(fastifyStatic, {
+	root: path.join(__dirname, 'public', 'order'),
+	prefix: '/images/order',
+	decorateReply: false,
+});
+
 await fastify.register(cors, {
 	// put your options here
 });
