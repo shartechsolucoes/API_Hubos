@@ -25,7 +25,7 @@ export default function (fastify, opts, done) {
 		return updateUser(request, reply);
 	});
 
-	fastify.post('/login', { onRequest: [verifyJwt] }, (request, reply) => {
+	fastify.post('/login', (request, reply) => {
 		return login(request, reply);
 	});
 
