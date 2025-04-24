@@ -67,7 +67,7 @@ export const insertStartPhoto = async (req, res) => {
 						await prisma.order.update({
 							where: { id: parseInt(id) },
 							data: {
-								photoStartWork: `/images/order/${os}/start.webp`,
+								photoStartWork: `/images/order/${os}/start-${parseDate}.webp`,
 								status: 1,
 							},
 						});
@@ -141,7 +141,7 @@ export const insertEndPhoto = async (req, res) => {
 						await prisma.order.update({
 							where: { id: parseInt(id) },
 							data: {
-								photoEndWork: `/images/order/${os}/end.webp`,
+								photoEndWork: `/images/order/${os}/end-${parseDate}.webp`,
 								status: 2,
 							},
 						});
