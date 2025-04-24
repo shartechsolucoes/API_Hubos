@@ -16,6 +16,14 @@ if (!fs.existsSync('./public/order')) {
 	fs.mkdirSync('./public/order', { recursive: true });
 }
 
+const currentDate = new Date();
+const day = currentDate.getDate();
+const month = currentDate.getMonth();
+const year = currentDate.getFullYear();
+const time = currentDate.getTime();
+
+const parseDate = day + '-' + month + '-' + year + '_' + time;
+
 export const insertStartPhoto = async (req, res) => {
 	const parts = req.parts();
 	const { id, os } = req.query;
@@ -34,7 +42,7 @@ export const insertStartPhoto = async (req, res) => {
 				});
 			}
 			// const uploadPath = path.join('public', 'endWork', part.filename);
-			const webpFilename = 'start' + '.webp';
+			const webpFilename = 'start-' + parseDate + '.webp';
 			const webpPath = path.join('public', 'order', os, webpFilename);
 
 			const writeStream = fs.createWriteStream(webpPath);
@@ -72,7 +80,7 @@ export const insertStartPhoto = async (req, res) => {
 				}
 				res.send({
 					message: 'Arquivo enviado com sucesso!',
-					file: `/images/order/${os}/start.webp`,
+					file: `/images/order/${os}/start-${parseDate}.webp`,
 				});
 			} catch (error) {
 				console.error('Erro ao processar a imagem');
@@ -106,7 +114,7 @@ export const insertEndPhoto = async (req, res) => {
 				});
 			}
 			// const uploadPath = path.join('public', 'endWork', part.filename);
-			const webpFilename = 'end' + '.webp';
+			const webpFilename = 'end-' + parseDate + '.webp';
 			const webpPath = path.join('public', 'order', os, webpFilename);
 
 			const writeStream = fs.createWriteStream(webpPath);
@@ -146,7 +154,7 @@ export const insertEndPhoto = async (req, res) => {
 				}
 				await res.send({
 					message: 'Arquivo enviado com sucesso!',
-					file: `/images/order/${os}/end.webp`,
+					file: `/images/order/${os}/end-${parseDate}.webp`,
 				});
 			} catch (error) {
 				console.error('Erro ao processar a imagem');
