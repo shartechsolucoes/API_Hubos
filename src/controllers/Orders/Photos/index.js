@@ -18,10 +18,11 @@ if (!fs.existsSync('./public/order')) {
 
 export const insertStartPhoto = async (req, res) => {
 	const parts = req.parts();
-	const { id } = req.query;
+	const { id, os } = req.query;
+	console.log(os);
 
-	if (!fs.existsSync(`./public/order/${id}`)) {
-		fs.mkdirSync(`./public/order/${id}`, { recursive: true });
+	if (!fs.existsSync(`./public/order/${os}`)) {
+		fs.mkdirSync(`./public/order/${os}`, { recursive: true });
 	}
 
 	for await (const part of parts) {
@@ -34,7 +35,7 @@ export const insertStartPhoto = async (req, res) => {
 			}
 			// const uploadPath = path.join('public', 'endWork', part.filename);
 			const webpFilename = 'start' + '.webp';
-			const webpPath = path.join('public', 'order', id, webpFilename);
+			const webpPath = path.join('public', 'order', os, webpFilename);
 
 			const writeStream = fs.createWriteStream(webpPath);
 
@@ -58,7 +59,7 @@ export const insertStartPhoto = async (req, res) => {
 						await prisma.order.update({
 							where: { id: parseInt(id) },
 							data: {
-								photoStartWork: `/images/order/${id}/start.webp`,
+								photoStartWork: `/images/order/${os}/start.webp`,
 								status: 1,
 							},
 						});
@@ -71,7 +72,7 @@ export const insertStartPhoto = async (req, res) => {
 				}
 				res.send({
 					message: 'Arquivo enviado com sucesso!',
-					file: `/images/order/${id}/start.webp`,
+					file: `/images/order/${os}/start.webp`,
 				});
 			} catch (error) {
 				console.error('Erro ao processar a imagem');
@@ -90,10 +91,10 @@ export const insertStartPhoto = async (req, res) => {
 
 export const insertEndPhoto = async (req, res) => {
 	const parts = req.parts();
-	const { id } = req.query;
+	const { id, os } = req.query;
 
-	if (!fs.existsSync(`./public/order/${id}`)) {
-		fs.mkdirSync(`./public/order/${id}`, { recursive: true });
+	if (!fs.existsSync(`./public/order/${os}`)) {
+		fs.mkdirSync(`./public/order/${os}`, { recursive: true });
 	}
 
 	for await (const part of parts) {
@@ -106,7 +107,7 @@ export const insertEndPhoto = async (req, res) => {
 			}
 			// const uploadPath = path.join('public', 'endWork', part.filename);
 			const webpFilename = 'end' + '.webp';
-			const webpPath = path.join('public', 'order', id, webpFilename);
+			const webpPath = path.join('public', 'order', os, webpFilename);
 
 			const writeStream = fs.createWriteStream(webpPath);
 
@@ -132,7 +133,7 @@ export const insertEndPhoto = async (req, res) => {
 						await prisma.order.update({
 							where: { id: parseInt(id) },
 							data: {
-								photoEndWork: `/images/order/${id}/end.webp`,
+								photoEndWork: `/images/order/${os}/end.webp`,
 								status: 2,
 							},
 						});
@@ -145,7 +146,7 @@ export const insertEndPhoto = async (req, res) => {
 				}
 				await res.send({
 					message: 'Arquivo enviado com sucesso!',
-					file: `/images/order/${id}/end.webp`,
+					file: `/images/order/${os}/end.webp`,
 				});
 			} catch (error) {
 				console.error('Erro ao processar a imagem');
