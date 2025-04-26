@@ -193,28 +193,18 @@ export const listOrders = async (req, res) => {
 
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
-			 o.qr_code
-    FROM \`Order\` o
-    where o.active = 1 ${querySearch} order by o.id desc ${queryPagination};`
+  		o.*,
+  		JSON_ARRAYAGG(k.description) AS ordersKits
+		FROM \`Order\` o
+		LEFT JOIN ordersKits ok ON ok.order_id = o.id
+		LEFT JOIN kit k ON k.id = ok.kit_id
+		WHERE o.active = 1
+  	${querySearch}  -- Aqui você pode adicionar seus filtros dinâmicos
+		GROUP BY o.id
+		ORDER BY o.id DESC
+		${queryPagination};`
 	);
-
-	const osParser = listOs.map((lo) => parseInt(lo.qr_code));
-
-	const query = {
-		where: {
-			qr_code: { in: osParser },
-		},
-	};
-
-	const [orders, total, actives] = await prisma.$transaction([
-		prisma.order.findMany({
-			where: query.where,
-			orderBy: { id: 'desc' },
-			take: 10,
-			include: {
-				ordersKits: { include: { kit: true } },
-			},
-		}),
+	const [total, actives] = await prisma.$transaction([
 		prisma.$queryRawUnsafe(
 			`SELECT COUNT(*) as total
 			FROM \`Order\` o
@@ -223,27 +213,19 @@ export const listOrders = async (req, res) => {
 		prisma.order.count({ where: { active: true } }),
 	]);
 
-	const listOrders = orders.map(async (order) => {
+	const listOrders = listOs.map(async (order) => {
 		if (!order.userId) {
-			return { ...order, user: {} };
+			return { ...order, ordersKits: JSON.parse(order.ordersKits), user: {} };
 		}
 		const user = await prisma.user.findFirst({
 			where: { id: order.userId },
 		});
-		return { ...order, user };
+		return { ...order, ordersKits: JSON.parse(order.ordersKits), user };
 	});
 
 	const resolvePromise = await Promise.all(listOrders);
-
-	const uniqueOrders = Object.values(
-		resolvePromise.reduce((acc, order) => {
-			acc[order.id] = order;
-			return acc;
-		}, {})
-	);
-
 	return res.send({
-		orders: uniqueOrders,
+		orders: resolvePromise,
 		count: { total: total[0].total, actives },
 	});
 };
