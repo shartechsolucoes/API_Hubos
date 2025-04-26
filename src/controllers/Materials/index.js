@@ -53,6 +53,21 @@ export const updateMaterial = async (req, res) => {
 export const deleteMaterial = async (req, res) => {
 	const { id } = req.params;
 	const materialId = parseInt(id);
+
+	const usedMaterial = await prisma.kitMaterial.findFirst({
+		where: { material_id: materialId },
+	});
+
+	const usedKit = await prisma.ordersKits.findFirst({
+		where: { kit_id: usedMaterial.kit_id },
+	});
+
+	if (usedKit) {
+		return res
+			.code(405)
+			.send({ msg: 'Não é possível deletar, material em uso' });
+	}
+
 	await prisma.material.update({
 		where: { id: materialId },
 		data: { active: false },
