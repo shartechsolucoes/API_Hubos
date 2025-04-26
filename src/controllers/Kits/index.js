@@ -35,7 +35,7 @@ export const updateKit = async (req, res) => {
 		where: { id: kitId },
 		data: {
 			description,
-			status: status === 'true' ? true : false,
+			status: status,
 		},
 	});
 
