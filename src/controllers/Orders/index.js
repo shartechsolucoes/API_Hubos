@@ -156,8 +156,6 @@ export const listOrders = async (req, res) => {
 	const { page, os, neighborhood, status, dateStart, dateEnd, userId } =
 		req.query;
 
-	console.log('userId =>', userId);
-
 	const user = await prisma.user.findFirst({
 		where: { id: userId },
 	});
@@ -192,10 +190,6 @@ export const listOrders = async (req, res) => {
 	if (userId && userId !== '' && user.access_level !== 0) {
 		querySearch += ` AND o.userId = '${userId}'`;
 	}
-	console.log(`SELECT
-			 o.qr_code
-    FROM \`Order\` o
-    where o.active = 1 ${querySearch} order by o.id desc ${queryPagination};`);
 
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
@@ -205,8 +199,6 @@ export const listOrders = async (req, res) => {
 	);
 
 	const osParser = listOs.map((lo) => parseInt(lo.qr_code));
-
-	console.log(osParser);
 
 	const query = {
 		where: {
