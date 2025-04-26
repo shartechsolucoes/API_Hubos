@@ -27,7 +27,6 @@ const parseDate = day + '-' + month + '-' + year + '_' + time;
 export const insertStartPhoto = async (req, res) => {
 	const parts = req.parts();
 	const { id, os } = req.query;
-	console.log(os);
 
 	if (!fs.existsSync(`./public/order/${os}`)) {
 		fs.mkdirSync(`./public/order/${os}`, { recursive: true });
