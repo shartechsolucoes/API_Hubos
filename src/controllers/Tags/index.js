@@ -47,7 +47,7 @@ export const getTags = async (req, res) => {
 		queryPagination += `LIMIT 10 OFFSET ${parseInt(page || 0) * 10}`;
 	}
 	const qr_code = await prisma.$queryRawUnsafe(
-		`SELECT t.*, o.qr_code
+		`SELECT t.*, o.qr_code, o.registerDay
 			FROM Tag t
 			LEFT JOIN \`Order\` o ON o.qr_code = t.referenceCode
 			ORDER BY t.referenceCode DESC
