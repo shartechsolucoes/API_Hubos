@@ -69,12 +69,22 @@ export const updateKit = async (req, res) => {
 export const deleteKit = async (req, res) => {
 	const { id } = req.params;
 	const kitId = parseInt(id);
+
+	const usedKit = await prisma.ordersKits.findFirst({
+		where: { kit_id: kitId },
+	});
+
+	if (usedKit) {
+		return res.code(405).send({ msg: 'Não é possível deletar, Kit em uso' });
+	}
+
 	await prisma.kit.update({
 		where: { id: kitId },
 		data: { active: false },
 	});
 	return res.send({ msg: 'Successfully deleted ' });
 };
+
 export const getKit = async (req, res) => {
 	const { id } = req.params;
 	const kitId = parseInt(id);
