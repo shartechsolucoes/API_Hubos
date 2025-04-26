@@ -153,7 +153,14 @@ export const getOrder = async (req, res) => {
 	return res.send({ ...orders, ordersKits });
 };
 export const listOrders = async (req, res) => {
-	const { page, os, neighborhood, status, dateStart, dateEnd } = req.query;
+	const { page, os, neighborhood, status, dateStart, dateEnd, userId } =
+		req.query;
+
+	console.log('userId =>', userId);
+
+	const user = await prisma.user.findFirst({
+		where: { id: userId },
+	});
 
 	let querySearch = '';
 	let queryPagination = '';
@@ -182,6 +189,14 @@ export const listOrders = async (req, res) => {
 		queryPagination += `LIMIT 10 OFFSET ${parseInt(page || 0) * 10}`;
 	}
 
+	if (userId && userId !== '' && user.access_level !== 0) {
+		querySearch += ` AND o.userId = '${userId}'`;
+	}
+	console.log(`SELECT
+			 o.qr_code
+    FROM \`Order\` o
+    where o.active = 1 ${querySearch} order by o.id desc ${queryPagination};`);
+
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
 			 o.qr_code
@@ -190,6 +205,7 @@ export const listOrders = async (req, res) => {
 	);
 
 	const osParser = listOs.map((lo) => parseInt(lo.qr_code));
+
 	console.log(osParser);
 
 	const query = {
@@ -202,6 +218,7 @@ export const listOrders = async (req, res) => {
 		prisma.order.findMany({
 			where: query.where,
 			orderBy: { id: 'desc' },
+			take: 10,
 			include: {
 				ordersKits: { include: { kit: true } },
 			},
@@ -226,8 +243,15 @@ export const listOrders = async (req, res) => {
 
 	const resolvePromise = await Promise.all(listOrders);
 
+	const uniqueOrders = Object.values(
+		resolvePromise.reduce((acc, order) => {
+			acc[order.id] = order;
+			return acc;
+		}, {})
+	);
+
 	return res.send({
-		orders: resolvePromise,
+		orders: uniqueOrders,
 		count: { total: total[0].total, actives },
 	});
 };
