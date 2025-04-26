@@ -357,6 +357,8 @@ export const duplicateOrder = async (req, res) => {
 			...copyOrder,
 			qr_code: osCode + 1,
 			registerDay: new Date(),
+			photoStartWork: '',
+			photoEndWork: '',
 			active: true,
 			duplicated: true,
 		},
