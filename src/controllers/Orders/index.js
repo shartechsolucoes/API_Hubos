@@ -194,12 +194,12 @@ export const listOrders = async (req, res) => {
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
   		o.*,
-  		JSON_ARRAYAGG(k.description) AS ordersKits
+  		k.description AS ordersKits
 		FROM \`Order\` o
-		LEFT JOIN ordersKits ok ON ok.order_id = o.id
-		LEFT JOIN kit k ON k.id = ok.kit_id
+		LEFT JOIN OrdersKits ok ON ok.order_id = o.id
+		LEFT JOIN Kit k ON k.id = ok.kit_id
 		WHERE o.active = 1
-  	${querySearch}  -- Aqui você pode adicionar seus filtros dinâmicos
+  	${querySearch}
 		GROUP BY o.id
 		ORDER BY o.id DESC
 		${queryPagination};`
@@ -213,14 +213,16 @@ export const listOrders = async (req, res) => {
 		prisma.order.count({ where: { active: true } }),
 	]);
 
+	console.log(listOs);
+
 	const listOrders = listOs.map(async (order) => {
 		if (!order.userId) {
-			return { ...order, ordersKits: JSON.parse(order.ordersKits), user: {} };
+			return { ...order, user: {} };
 		}
 		const user = await prisma.user.findFirst({
 			where: { id: order.userId },
 		});
-		return { ...order, ordersKits: JSON.parse(order.ordersKits), user };
+		return { ...order, user };
 	});
 
 	const resolvePromise = await Promise.all(listOrders);
