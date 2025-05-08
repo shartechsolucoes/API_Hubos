@@ -50,7 +50,7 @@ export const createUser = async (req, res) => {
 			neighborhood,
 			state,
 			city,
-			status: status === '0' ? true : false,
+			status: true,
 		},
 	});
 
@@ -155,7 +155,7 @@ export const updateUser = async (req, res) => {
 			neighborhood,
 			state,
 			city,
-			status: status === '0' ? true : false,
+			status,
 		},
 		omit: { password: true },
 	});
