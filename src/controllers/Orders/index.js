@@ -187,7 +187,7 @@ export const listOrders = async (req, res) => {
 		queryPagination += `LIMIT 10 OFFSET ${parseInt(page || 0) * 10}`;
 	}
 
-	if (userId && userId !== '' && user.access_level !== 0) {
+	if (userId && userId !== '' && user.access_level !== 0 && user.access_level !== 1) {
 		querySearch += ` AND o.userId = '${userId}'`;
 	}
 
