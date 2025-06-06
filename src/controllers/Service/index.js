@@ -18,16 +18,25 @@ export class Service {
 		this.order = data.order || null;
 	}
 
-	static async listServices(page = 1, perPage = 10) {
+	static async listServices(userId, page = 1, perPage = 10) {
 		const skip = (page - 1) * perPage;
+
+		const where = userId ? { userId, active: true } : { active: true }; // aplica filtro apenas se userId existir
 
 		const [services, total] = await Promise.all([
 			prisma.service.findMany({
+				where,
 				skip,
 				take: perPage,
 				orderBy: { id: 'desc' },
+				include: {
+					user: true,
+					order: true,
+				},
 			}),
-			prisma.service.count(),
+			prisma.service.count({
+				where,
+			}),
 		]);
 
 		return {
@@ -40,6 +49,7 @@ export class Service {
 			},
 		};
 	}
+
 	static async getById(id) {
 		return await prisma.service.findUnique({
 			where: { id: Number(id) },
@@ -67,26 +77,42 @@ export class Service {
 			protocolNumber: this.protocolNumber,
 			numberPost: this.numberPost,
 			observation: this.observation,
-			userId: this.userId ?? null,
-			orderId: this.orderId > 0 ? this.orderId : null,
 			address: this.address,
 			neighborhood: this.neighborhood,
 			city: this.city,
 			state: this.state,
 		};
 
-		console.log(data);
-		if (!this.id) throw new Error('ID é obrigatório para atualizar.');
-		if (data.userId) {
+		// Verifica e adiciona userId se existir e for válido
+		if (this.userId) {
 			const userExists = await prisma.user.findUnique({
-				where: { id: data.userId },
+				where: { id: this.userId },
 			});
 
 			if (!userExists) {
-				throw new Error(`Usuário com id ${data.userId} não encontrado`);
+				throw new Error(`Usuário com id ${this.userId} não encontrado`);
 			}
+
+			data.userId = this.userId;
 		}
 
+		// Verifica e adiciona orderId se existir e for válido
+		if (this.orderId) {
+			const orderExists = await prisma.order.findUnique({
+				where: { id: this.orderId },
+			});
+
+			if (!orderExists) {
+				throw new Error(`Ordem com id ${this.orderId} não encontrada`);
+			}
+
+			data.orderId = this.orderId;
+		} else {
+			// Define null apenas se o campo aceitar null (o que parece ser o seu caso)
+			data.orderId = null;
+		}
+
+		// Atualiza o serviço com os dados validados
 		return await prisma.service.update({
 			where: { id: this.id },
 			data,
@@ -94,8 +120,11 @@ export class Service {
 	}
 
 	static async deleteService(id) {
-		return await prisma.service.delete({
+		return await prisma.service.update({
 			where: { id: Number(id) },
+			data: {
+				active: false,
+			},
 		});
 	}
 }

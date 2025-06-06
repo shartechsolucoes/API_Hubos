@@ -119,6 +119,9 @@ model Service {
   neighborhood   String       @db.VarChar(50)
   city           String       @db.VarChar(50)
   state          String       @db.VarChar(3)
+  registerDate   DateTime     @default(now())
+  status         Int          @default(0)
+  active         Boolean      @default(true)
   user           User?  @relation(fields: [userId], references: [id])
   order          Order? @relation(fields: [orderId], references: [id])
 }

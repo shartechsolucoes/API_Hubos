@@ -7,9 +7,10 @@ export default function (fastify, opts, done) {
 		{ onRequest: [verifyJwt] },
 		async (request, reply) => {
 			const page = parseInt(request.query.page) || 1;
+			const userId = request.query.userId;
 			const perPage = 10;
 
-			const services = await Service.listServices(page, perPage);
+			const services = await Service.listServices(userId, page, perPage);
 			return reply.send(services);
 		}
 	);
