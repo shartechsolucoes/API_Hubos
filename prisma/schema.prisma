@@ -29,6 +29,7 @@ model User {
   phone        String?     @db.VarChar(15)
   status       Boolean?
   OrdersLog    OrdersLog[]
+  Service      Service[]
 }
 
 model Material {
@@ -60,9 +61,9 @@ model Kit {
 }
 
 model Tag {
-  id            Int    @id @default(autoincrement())
-  referenceCode Int @unique
-  date DateTime?
+  id            Int       @id @default(autoincrement())
+  referenceCode Int       @unique
+  date          DateTime?
 }
 
 model OrdersKits {
@@ -94,6 +95,7 @@ model Order {
   photoEndWork   String?
   ordersKits     OrdersKits[]
   OrdersLog      OrdersLog[]
+  Service        Service[]
 }
 
 model OrdersLog {
@@ -104,4 +106,22 @@ model OrdersLog {
   status      Int      @default(0)
   order       Order?   @relation(fields: [order_id], references: [id])
   user        User?    @relation(fields: [userId], references: [id])
+}
+
+model Service {
+  id             Int    @id @default(autoincrement())
+  protocolNumber String @default("")
+  numberPost     Int
+  observation    String @default("")
+  userId         String?
+  orderId        Int?
+  address        String       @db.VarChar(150)
+  neighborhood   String       @db.VarChar(50)
+  city           String       @db.VarChar(50)
+  state          String       @db.VarChar(3)
+  registerDate   DateTime     @default(now())
+  status         Int          @default(0)
+  active         Boolean      @default(true)
+  user           User?  @relation(fields: [userId], references: [id])
+  order          Order? @relation(fields: [orderId], references: [id])
 }

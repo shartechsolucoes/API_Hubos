@@ -13,6 +13,7 @@ import path, { dirname } from 'path';
 import fastifyStatic from '@fastify/static';
 import { fileURLToPath } from 'url';
 import tags from './src/routes/tags.js';
+import services from './src/routes/services.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -66,6 +67,7 @@ fastify.register(orders);
 fastify.register(dashboard);
 fastify.register(avatar);
 fastify.register(tags);
+fastify.register(services);
 
 // Run the server!
 try {
