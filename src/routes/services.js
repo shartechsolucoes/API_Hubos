@@ -8,9 +8,15 @@ export default function (fastify, opts, done) {
 		async (request, reply) => {
 			const page = parseInt(request.query.page) || 1;
 			const userId = request.query.userId;
+			const search = request.query.search || '';
 			const perPage = 10;
 
-			const services = await Service.listServices(userId, page, perPage);
+			const services = await Service.listServices(
+				userId,
+				search,
+				page,
+				perPage
+			);
 			return reply.send(services);
 		}
 	);

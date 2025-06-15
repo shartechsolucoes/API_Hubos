@@ -18,14 +18,26 @@ export class Service {
 		this.order = data.order || null;
 	}
 
-	static async listServices(userId, page = 1, perPage = 10) {
+	static async listServices(userId, search = '', page = 1, perPage = 10) {
 		const skip = (page - 1) * perPage;
 
-		const where = userId ? { userId, active: true } : { active: true }; // aplica filtro apenas se userId existir
+		const baseWhere = {
+			active: true,
+		};
+
+		if (userId) {
+			baseWhere.userId = userId;
+		}
+
+		if (search.trim() !== '') {
+			baseWhere.OR = [
+				{ protocolNumber: { contains: search, lte: 'insensitive' } },
+			];
+		}
 
 		const [services, total] = await Promise.all([
 			prisma.service.findMany({
-				where,
+				where: baseWhere,
 				skip,
 				take: perPage,
 				orderBy: { id: 'desc' },
@@ -35,7 +47,7 @@ export class Service {
 				},
 			}),
 			prisma.service.count({
-				where,
+				where: baseWhere,
 			}),
 		]);
 
