@@ -7,6 +7,9 @@ BigInt.prototype.toJSON = function () {
 	return int ?? this.toString();
 };
 
+const BUSINESS_START = 8;  // 08:00
+const BUSINESS_END = 18;   // 18:00
+
 export const createOrder = async (req, res) => {
 	const {
 		address,
@@ -162,6 +165,7 @@ export const listOrders = async (req, res) => {
 
 	let querySearch = '';
 	let queryPagination = '';
+	let whereActive = "o.active = 1"; // padrão: só ativos
 
 	if (os) {
 		querySearch += ` AND o.qr_code LIKE CONCAT('%', ${os}, '%')`;
@@ -187,30 +191,35 @@ export const listOrders = async (req, res) => {
 		queryPagination += `LIMIT 10 OFFSET ${parseInt(page || 0) * 10}`;
 	}
 
-	if (userId && userId !== '' && user.access_level !== 0 && user.access_level !== 1) {
+	if (userId && userId !== '' && user.access_level !== 0 && user.access_level !== 1 && user.access_level !== 99) {
 		querySearch += ` AND o.userId = '${userId}'`;
+	}
+
+	if (user.access_level === 99) {
+		whereActive = "1=1"; // traz todos (ativos e inativos)
 	}
 
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
-  		o.*,
-  		k.description AS ordersKits
-		FROM \`Order\` o
-		LEFT JOIN OrdersKits ok ON ok.order_id = o.id
-		LEFT JOIN Kit k ON k.id = ok.kit_id
-		WHERE o.active = 1
-  	${querySearch}
-		GROUP BY o.id
-		ORDER BY o.id DESC
-		${queryPagination};`
+			 o.*,
+			 k.description AS ordersKits
+		 FROM \`Order\` o
+				  LEFT JOIN OrdersKits ok ON ok.order_id = o.id
+				  LEFT JOIN Kit k ON k.id = ok.kit_id
+		 WHERE ${whereActive}
+			 ${querySearch}
+		 GROUP BY o.id
+		 ORDER BY o.id DESC
+			 ${queryPagination};`
 	);
+
 	const [total, actives] = await prisma.$transaction([
 		prisma.$queryRawUnsafe(
 			`SELECT COUNT(*) as total
-			FROM \`Order\` o
-			where o.active = 1 ${querySearch} ;`
+			 FROM \`Order\` o
+			 WHERE ${whereActive} ${querySearch};`
 		),
-		prisma.order.count({ where: { active: true } }),
+		prisma.order.count({ where: { active: true } }), // sempre conta só os ativos
 	]);
 
 	console.log(listOs);
@@ -373,3 +382,136 @@ export const duplicateOrder = async (req, res) => {
 		});
 	});
 };
+
+export const ordersReports = async (req, reply) => {
+	try {
+		const { start, end } = req.query;
+
+		if (!start || !end) {
+			return reply.code(400).send({
+				msg: 'Período inicial e final são obrigatórios',
+			});
+		}
+
+		const startDate = new Date(`${start}T00:00:00`);
+		const endDate = new Date(`${end}T23:59:59`);
+
+		/* =========================
+		   OS CRIADAS (DETALHADAS)
+		========================= */
+		const createdOrders = await prisma.order.findMany({
+			where: {
+				active: true,
+				registerDay: {
+					gte: startDate,
+					lte: endDate,
+				},
+			},
+			select: {
+				registerDay: true,
+				neighborhood: true,
+			},
+		});
+
+		let createdOutsideBusinessHours = 0;
+
+		const outsideByNeighborhood = {};
+
+		for (const order of createdOrders) {
+			const date = new Date(order.registerDay);
+
+			// dia da semana (0 = domingo, 6 = sábado)
+			const day = date.getDay();
+			const hour = date.getHours();
+
+			const isWeekend = day === 0 || day === 6;
+			const isOutsideHours =
+				hour < BUSINESS_START || hour >= BUSINESS_END;
+
+			if (isWeekend || isOutsideHours) {
+				createdOutsideBusinessHours++;
+
+				if (order.neighborhood) {
+					outsideByNeighborhood[order.neighborhood] =
+						(outsideByNeighborhood[order.neighborhood] || 0) + 1;
+				}
+			}
+		}
+
+		/* =========================
+		   AGRUPAMENTOS PADRÃO
+		========================= */
+		const dateFilter = {
+			registerDay: {
+				gte: startDate,
+				lte: endDate,
+			},
+		};
+
+		const created = await prisma.order.groupBy({
+			by: ['neighborhood'],
+			where: {
+				active: true,
+				...dateFilter,
+			},
+			_count: { _all: true },
+		});
+
+		const duplicated = await prisma.order.groupBy({
+			by: ['neighborhood'],
+			where: {
+				duplicated: true,
+				...dateFilter,
+			},
+			_count: { _all: true },
+		});
+
+		const deleted = await prisma.order.groupBy({
+			by: ['neighborhood'],
+			where: {
+				active: false,
+				...dateFilter,
+			},
+			_count: { _all: true },
+		});
+
+		const neighborhoods = new Set([
+			...created.map((i) => i.neighborhood),
+			...duplicated.map((i) => i.neighborhood),
+			...deleted.map((i) => i.neighborhood),
+		]);
+
+		const report = Array.from(neighborhoods).map((bairro) => ({
+			neighborhood: bairro,
+			created:
+				created.find((i) => i.neighborhood === bairro)?._count._all ??
+				0,
+			duplicated:
+				duplicated.find((i) => i.neighborhood === bairro)?._count
+					._all ?? 0,
+			deleted:
+				deleted.find((i) => i.neighborhood === bairro)?._count._all ??
+				0,
+			outsideBusinessHours:
+				outsideByNeighborhood[bairro] ?? 0,
+		}));
+
+		return reply.send({
+			period: { start, end },
+			total: {
+				created: createdOrders.length,
+				duplicated: report.reduce((s, i) => s + i.duplicated, 0),
+				deleted: report.reduce((s, i) => s + i.deleted, 0),
+				createdOutsideBusinessHours,
+			},
+			byNeighborhood: report,
+		});
+	} catch (error) {
+		console.error(error);
+		return reply.code(500).send({
+			msg: 'Erro ao gerar relatório',
+		});
+	}
+};
+
+

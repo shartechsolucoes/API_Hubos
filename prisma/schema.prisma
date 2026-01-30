@@ -109,19 +109,54 @@ model OrdersLog {
 }
 
 model Service {
-  id             Int    @id @default(autoincrement())
-  protocolNumber String @default("")
+  id             Int      @id @default(autoincrement())
+  protocolNumber String   @default("")
   numberPost     Int
-  observation    String @default("")
+  observation    String   @default("")
   userId         String?
   orderId        Int?
-  address        String       @db.VarChar(150)
-  neighborhood   String       @db.VarChar(50)
-  city           String       @db.VarChar(50)
-  state          String       @db.VarChar(3)
-  registerDate   DateTime     @default(now())
-  status         Int          @default(0)
-  active         Boolean      @default(true)
-  user           User?  @relation(fields: [userId], references: [id])
-  order          Order? @relation(fields: [orderId], references: [id])
+  address        String   @db.VarChar(150)
+  neighborhood   String   @db.VarChar(50)
+  city           String   @db.VarChar(50)
+  state          String   @db.VarChar(3)
+  registerDate   DateTime @default(now())
+  status         Int      @default(0)
+  active         Boolean  @default(true)
+  user           User?    @relation(fields: [userId], references: [id])
+  order          Order?   @relation(fields: [orderId], references: [id])
+}
+
+model Post {
+  id           Int        @id @default(autoincrement())
+  code         String     @unique
+  address      String?
+  neighborhood String?
+  city         String     @default("SuaCidade")
+  state        String?
+  latitude     Float?
+  longitude    Float?
+  type         PostType   @default(CONCRETE)
+  material     String?
+  heightMeters Float?
+  installedAt  DateTime?
+  status       PostStatus @default(ACTIVE)
+  photoUrl     String?
+  notes        String?
+  duplicated   Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  updatedBy    Int? // user id, opcional
+}
+
+enum PostType {
+  WOOD
+  CONCRETE
+  METAL
+  OTHER
+}
+
+enum PostStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
 }

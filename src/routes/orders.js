@@ -8,6 +8,7 @@ import {
 	listOrders,
 	removeKitOrder,
 	updateOrder,
+	ordersReports,
 } from '../controllers/Orders/index.js';
 import {
 	insertEndPhoto,
@@ -55,6 +56,10 @@ export default function (fastify, opts, done) {
 			return findOrdersMaterialsByDate(request, reply);
 		}
 	);
+	fastify.get( '/reports/ordersRoot', { onRequest: [verifyJwt] }, (request, reply) => {
+		return ordersReports(request, reply);
+	});
+
 
 	fastify.post(
 		'/order/duplicate/:id',
@@ -77,7 +82,7 @@ export default function (fastify, opts, done) {
 		(request, reply) => {
 			return insertEndPhoto(request, reply);
 		}
-	);
+	)
 
 	done();
 }

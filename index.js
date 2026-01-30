@@ -14,6 +14,7 @@ import fastifyStatic from '@fastify/static';
 import { fileURLToPath } from 'url';
 import tags from './src/routes/tags.js';
 import services from './src/routes/services.js';
+import posts from './src/routes/posts.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -68,6 +69,7 @@ fastify.register(dashboard);
 fastify.register(avatar);
 fastify.register(tags);
 fastify.register(services);
+fastify.register(posts);
 
 // Run the server!
 try {
