@@ -87,6 +87,7 @@ model Order {
   lat            String
   long           String
   qr_code        Int
+  type           Int?
   protocolNumber String       @default("")
   active         Boolean      @default(true)
   registerDay    DateTime     @default(now())

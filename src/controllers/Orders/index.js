@@ -20,6 +20,7 @@ export const createOrder = async (req, res) => {
 		observations,
 		lat,
 		long,
+		type,
 		qr_code,
 		ordersKits,
 		protocolNumber,
@@ -33,6 +34,7 @@ export const createOrder = async (req, res) => {
 	});
 	const osCode = parseInt(qr_code);
 	const osStatus = parseInt(status);
+	const osType = parseInt(type);
 
 	const tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
 	const localISOTime = new Date(Date.now() - tzoffset).toISOString();
@@ -47,6 +49,7 @@ export const createOrder = async (req, res) => {
 			observations,
 			lat,
 			long,
+			type: osType,
 			qr_code: osCode,
 			registerDay: localISOTime,
 			protocolNumber,
@@ -81,7 +84,9 @@ export const updateOrder = async (req, res) => {
 		observations,
 		lat,
 		long,
+		type,
 		qr_code,
+		registerDay,
 		protocolNumber,
 		photoEndWork,
 		photoStartWork,
@@ -89,6 +94,7 @@ export const updateOrder = async (req, res) => {
 
 	const osCode = parseInt(qr_code);
 	const osStatus = parseInt(status);
+	const osType = parseInt(type);
 
 	const newOrder = await prisma.order.update({
 		where: { id: orderId },
@@ -101,9 +107,11 @@ export const updateOrder = async (req, res) => {
 			observations,
 			lat,
 			long,
+			type: osType,
 			qr_code: osCode,
 			protocolNumber,
 			photoEndWork,
+			registerDay,
 			photoStartWork,
 		},
 	});
@@ -191,13 +199,14 @@ export const listOrders = async (req, res) => {
 		queryPagination += `LIMIT 10 OFFSET ${parseInt(page || 0) * 10}`;
 	}
 
-	if (userId && userId !== '' && user.access_level !== 0 && user.access_level !== 1 && user.access_level !== 99) {
+	if (userId && userId !== '' && user.access_level !== 0 && user.access_level !== 1 && user.access_level !== 99 && user.access_level !== 4) {
 		querySearch += ` AND o.userId = '${userId}'`;
 	}
 
 	if (user.access_level === 99) {
 		whereActive = "1=1"; // traz todos (ativos e inativos)
 	}
+
 
 	const listOs = await prisma.$queryRawUnsafe(
 		`SELECT
