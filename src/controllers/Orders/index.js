@@ -92,6 +92,12 @@ export const updateOrder = async (req, res) => {
 		photoStartWork,
 	} = req.body;
 
+	const date = new Date().toLocaleString('sv-SE', {
+		timeZone: 'America/Sao_Paulo',
+	});
+	const tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
+	const localISOTime = new Date(Date.now() - tzoffset).toISOString();
+
 	const osCode = parseInt(qr_code);
 	const osStatus = parseInt(status);
 	const osType = parseInt(type);
@@ -111,7 +117,7 @@ export const updateOrder = async (req, res) => {
 			qr_code: osCode,
 			protocolNumber,
 			photoEndWork,
-			registerDay,
+			registerDay: localISOTime,
 			photoStartWork,
 		},
 	});
