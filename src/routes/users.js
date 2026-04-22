@@ -7,38 +7,28 @@ import {
 	updateUser,
 	userActivities,
 } from '../controllers/User/index.js';
+
 import { verifyJwt } from '../middleware/JWTAuth.js';
 
 export default function (fastify, opts, done) {
-	fastify.post('/user', (request, reply) => {
-		return createUser(request, reply);
-	});
 
-	fastify.get('/users', { onRequest: [verifyJwt] }, (request, reply) => {
-		return getUsers(request, reply);
-	});
+	fastify.post('/user', createUser);
 
-	fastify.get('/user/:id', { onRequest: [verifyJwt] }, (request, reply) => {
-		return getUser(request, reply);
-	});
-	fastify.put('/user/:id', { onRequest: [verifyJwt] }, (request, reply) => {
-		return updateUser(request, reply);
-	});
+	fastify.get('/users', { onRequest: [verifyJwt] }, getUsers);
 
-	fastify.post('/login', (request, reply) => {
-		return login(request, reply);
-	});
+	fastify.get('/user/:id', { onRequest: [verifyJwt] }, getUser);
 
-	fastify.put('/reset-password', (request, reply) => {
-		return changePassword(request, reply);
-	});
+	fastify.put('/user/:id', { onRequest: [verifyJwt] }, updateUser);
+
+	fastify.post('/login', login);
+
+	fastify.put('/reset-password', changePassword);
 
 	fastify.get(
 		'/user/activities',
 		{ onRequest: [verifyJwt] },
-		(request, reply) => {
-			return userActivities(request, reply);
-		}
+		userActivities
 	);
+
 	done();
 }

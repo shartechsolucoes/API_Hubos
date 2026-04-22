@@ -101,25 +101,36 @@ export const updateOrder = async (req, res) => {
 	const osCode = parseInt(qr_code);
 	const osStatus = parseInt(status);
 	const osType = parseInt(type);
+	const dataToUpdate = {
+		address,
+		neighborhood,
+		city,
+		state,
+		status: osStatus,
+		observations,
+		lat,
+		long,
+		type: osType,
+		qr_code: osCode,
+		protocolNumber,
+		photoEndWork,
+		updateDay: localISOTime,
+		photoStartWork,
+	};
+
+	if (registerDay) {
+		const parsedRegisterDay = new Date(registerDay);
+
+		if (Number.isNaN(parsedRegisterDay.getTime())) {
+			return res.status(400).send({ error: 'Data de registro inválida' });
+		}
+
+		dataToUpdate.registerDay = parsedRegisterDay;
+	}
 
 	const newOrder = await prisma.order.update({
 		where: { id: orderId },
-		data: {
-			address,
-			neighborhood,
-			city,
-			state,
-			status: osStatus,
-			observations,
-			lat,
-			long,
-			type: osType,
-			qr_code: osCode,
-			protocolNumber,
-			photoEndWork,
-			registerDay: localISOTime,
-			photoStartWork,
-		},
+		data: dataToUpdate,
 	});
 	ordersKits.forEach(async (kit) => {
 		const findKit = await prisma.ordersKits.findFirst({

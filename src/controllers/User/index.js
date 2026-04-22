@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
+import { logAction } from '../../Services/auditLogService.js';
 const { hashSync, genSaltSync, compareSync } = bcryptjs;
 
 const prisma = new PrismaClient();
@@ -82,9 +83,25 @@ export const login = async (req, res) => {
 
 	try {
 		const token = await res.jwtSign(
-			{ login: user.login },
+			{ id: user.id, login: user.login },
 			{ sign: { sub: user.id } }
 		);
+
+		await logAction({
+			userId: user.id,
+			action: 'LOGIN',
+			entity: 'user',
+			entityId: user.id,
+			route: '/login',
+			method: req.method,
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+			metadata: {
+				login: user.login,
+				statusCode: 200,
+			},
+		});
+
 		return res.send({
 			token,
 			access_level: user.access_level,
